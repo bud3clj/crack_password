@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crack the Password - Random</title>
+  <style>
+    :root{
+      --bg1:#140f2d;
+      --bg2:#5b1f61;
+      --text:#111827;
+      --muted:#6b7280;
+      --accent:#7c3aed;
+      --accent2:#ec4899;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --line:#e5e7eb;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Inter, Arial, Helvetica, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(236,72,153,.22), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(124,58,237,.30), transparent 30%),
+        linear-gradient(135deg,var(--bg1),var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+    }
+    .app{
+      width:min(860px,100%);
+      background:rgba(255,255,255,.97);
+      border-radius:26px;
+      box-shadow:0 20px 70px rgba(0,0,0,.35);
+      padding:26px;
+    }
+    h1{
+      margin:0 0 6px;
+      text-align:center;
+      font-size:clamp(2rem,4vw,3rem);
+    }
+    .subtitle{
+      margin:0 0 18px;
+      text-align:center;
+      color:var(--muted);
+    }
+    .topbar{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+    .badge{
+      padding:8px 12px;
+      border-radius:999px;
+      background:#f3f4f6;
+      font-weight:700;
+      color:#374151;
+      font-size:.95rem;
+    }
+    .lock-row{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:12px;
+      margin-bottom:20px;
+      font-size:2rem;
+      font-weight:700;
+    }
+    .slots{display:flex;gap:10px}
+    .slot{
+      width:62px;
+      height:62px;
+      border:3px solid #111;
+      border-radius:12px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.9rem;
+      font-weight:800;
+      background:#fafafa;
+    }
+    .section-title{
+      text-align:center;
+      font-size:1.05rem;
+      font-weight:900;
+      letter-spacing:.08em;
+      margin:4px 0 14px;
+    }
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:14px;
+      margin-bottom:22px;
+    }
+    .hint{
+      border:1px solid var(--line);
+      border-radius:18px;
+      padding:16px;
+      background:#fcfcfd;
+      min-height:110px;
+    }
+    .hint.wide{grid-column:1 / -1}
+    .code{
+      display:inline-flex;
+      gap:6px;
+      margin-bottom:10px;
+    }
+    .box{
+      width:42px;
+      height:42px;
+      border:2px solid #111;
+      border-radius:9px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:1.2rem;
+      font-weight:800;
+      background:#fff;
+    }
+    .hint p{
+      margin:0;
+      font-weight:800;
+      line-height:1.35;
+    }
+    .play{
+      border-top:1px solid var(--line);
+      padding-top:20px;
+    }
+    .input-row{
+      display:flex;
+      gap:12px;
+      justify-content:center;
+      flex-wrap:wrap;
+    }
+    input{
+      width:190px;
+      max-width:100%;
+      font-size:1.35rem;
+      padding:14px 16px;
+      border-radius:14px;
+      border:2px solid #d1d5db;
+      outline:none;
+      text-align:center;
+      letter-spacing:.35em;
+      font-weight:800;
+    }
+    input:focus{
+      border-color:var(--accent);
+      box-shadow:0 0 0 4px rgba(124,58,237,.12);
+    }
+    button{
+      border:none;
+      border-radius:14px;
+      padding:14px 18px;
+      font-size:1rem;
+      font-weight:800;
+      cursor:pointer;
+      transition:transform .16s ease, opacity .16s ease;
+    }
+    button:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+    .secondary{background:#f3f4f6;color:#111827}
+    .message{
+      min-height:28px;
+      margin-top:16px;
+      text-align:center;
+      font-size:1.05rem;
+      font-weight:800;
+    }
+    .ok{color:var(--ok)}
+    .bad{color:var(--bad)}
+    .meta,.note{
+      text-align:center;
+      color:var(--muted);
+      margin-top:8px;
+    }
+    .footer{
+      text-align:center;
+      color:var(--muted);
+      font-size:.92rem;
+      margin-top:18px;
+    }
+    @media (max-width:700px){
+      .grid{grid-template-columns:1fr}
+      .hint.wide{grid-column:auto}
+      .app{padding:18px;border-radius:20px}
+      .slot{width:54px;height:54px}
+      .box{width:38px;height:38px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Crack the Password</h1>
+    <p class="subtitle">Același tip de joc ca în imagine, dar cu puzzle-uri random și foarte multe variante.</p>
+
+    <div class="topbar">
+      <div class="badge" id="puzzleNo">Puzzle #1</div>
+      <div class="badge" id="statusText">Găsește codul din 3 cifre</div>
+    </div>
+
+    <div class="lock-row" aria-hidden="true">
+      <span>🔒</span>
+      <div class="slots">
+        <div class="slot" id="r1">?</div>
+        <div class="slot" id="r2">?</div>
+        <div class="slot" id="r3">?</div>
+      </div>
+    </div>
+
+    <div class="section-title">INDICII</div>
+    <section class="grid" id="clues"></section>
+
+    <section class="play">
+      <div class="input-row">
+        <input id="guess" type="text" inputmode="numeric" maxlength="3" placeholder="Ex: 042" aria-label="Introdu codul" />
+        <button class="primary" id="checkBtn">Verifică</button>
+        <button class="secondary" id="resetBtn">Resetează</button>
+        <button class="secondary" id="newBtn">Puzzle nou</button>
+      </div>
+      <div class="message" id="message"></div>
+      <div class="meta" id="attempts">Încercări: 0</div>
+      <div class="note">Fiecare puzzle este generat astfel încât să aibă o singură soluție.</div>
+    </section>
+
+    <div class="footer">Codurile folosesc 3 cifre diferite. Poate începe și cu 0.</div>
+  </main>
+
+  <script>
+    const cluesContainer = document.getElementById("clues");
+    const guessInput = document.getElementById("guess");
+    const message = document.getElementById("message");
+    const attempts = document.getElementById("attempts");
+    const puzzleNo = document.getElementById("puzzleNo");
+    const statusText = document.getElementById("statusText");
+    const slots = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
+
+    let tries = 0;
+    let puzzleIndex = 1;
+    let currentSolution = "";
+    let currentClues = [];
+
+    const PATTERN_LABELS = {
+      "1-0": "Un număr este corect și este pe poziția corectă.",
+      "0-1": "Un număr este corect, dar este pe poziția greșită.",
+      "0-2": "Două numere sunt corecte, dar sunt pe poziții greșite.",
+      "0-0": "Nimic nu este corect."
+    };
+
+    function digitsOnly(value){
+      return value.replace(/\D/g, "").slice(0,3);
+    }
+
+    function updateSlots(value = "???"){
+      const chars = value.padEnd(3, "?").slice(0,3).split("");
+      slots.forEach((slot, i) => slot.textContent = chars[i]);
+    }
+
+    function setMessage(text, type = ""){
+      message.textContent = text;
+      message.className = "message " + type;
+    }
+
+    function allCodes(){
+      const arr = [];
+      for(let i = 0; i <= 9; i++){
+        for(let j = 0; j <= 9; j++){
+          for(let k = 0; k <= 9; k++){
+            if(i !== j && i !== k && j !== k){
+              arr.push(`${i}${j}${k}`);
+            }
+          }
+        }
+      }
+      return arr;
+    }
+
+    const CODES = allCodes();
+
+    function evaluate(guess, code){
+      let wellPlaced = 0;
+      let common = 0;
+      for(let i = 0; i < 3; i++){
+        if(guess[i] === code[i]) wellPlaced++;
+        if(code.includes(guess[i])) common++;
+      }
+      return { wellPlaced, wrongPlaced: common - wellPlaced };
+    }
+
+    function patternMatches(guess, code, key){
+      const result = evaluate(guess, code);
+      return key === `${result.wellPlaced}-${result.wrongPlaced}`;
+    }
+
+    function shuffle(array){
+      const a = [...array];
+      for(let i = a.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function renderClues(clues){
+      cluesContainer.innerHTML = "";
+      clues.forEach((clue, idx) => {
+        const article = document.createElement("article");
+        article.className = "hint" + (idx === 4 ? " wide" : "");
+        const codeHtml = clue.guess.split("").map(d => `<div class="box">${d}</div>`).join("");
+        article.innerHTML = `<div class="code">${codeHtml}</div><p>${PATTERN_LABELS[clue.pattern]}</p>`;
+        cluesContainer.appendChild(article);
+      });
+    }
+
+    function solutionCount(clues){
+      let count = 0;
+      let only = null;
+      for(const candidate of CODES){
+        const ok = clues.every(clue => patternMatches(clue.guess, candidate, clue.pattern));
+        if(ok){
+          count++;
+          only = candidate;
+          if(count > 1) break;
+        }
+      }
+      return { count, only };
+    }
+
+    function buildPuzzle(){
+      const code = CODES[Math.floor(Math.random() * CODES.length)];
+      const buckets = { "1-0": [], "0-1": [], "0-2": [], "0-0": [] };
+
+      for(const guess of CODES){
+        if(guess === code) continue;
+        const ev = evaluate(guess, code);
+        const key = `${ev.wellPlaced}-${ev.wrongPlaced}`;
+        if(buckets[key]) buckets[key].push(guess);
+      }
+
+      const order = {
+        "1-0": shuffle(buckets["1-0"]),
+        "0-1": shuffle(buckets["0-1"]),
+        "0-2": shuffle(buckets["0-2"]),
+        "0-0": shuffle(buckets["0-0"])
+      };
+
+      const maxA = Math.min(90, order["1-0"].length);
+      const maxB = Math.min(130, order["0-1"].length);
+      const maxC = Math.min(90, order["0-2"].length);
+      const maxD = Math.min(60, order["0-0"].length);
+
+      for(let a = 0; a < maxA; a++){
+        for(let b = 0; b < maxB; b++){
+          for(let c = 0; c < maxC; c++){
+            for(let d = 0; d < maxD; d++){
+              for(let e = b + 1; e < Math.min(b + 30, maxB); e++){
+                const selected = [
+                  { guess: order["1-0"][a], pattern: "1-0" },
+                  { guess: order["0-1"][b], pattern: "0-1" },
+                  { guess: order["0-2"][c], pattern: "0-2" },
+                  { guess: order["0-0"][d], pattern: "0-0" },
+                  { guess: order["0-1"][e], pattern: "0-1" }
+                ];
+
+                if(new Set(selected.map(x => x.guess)).size !== 5) continue;
+
+                const result = solutionCount(selected);
+                if(result.count === 1 && result.only === code){
+                  return { code, clues: selected };
+                }
+              }
+            }
+          }
+        }
+      }
+      return null;
+    }
+
+    function generatePuzzle(){
+      setMessage("", "");
+      guessInput.value = "";
+      updateSlots("???");
+      tries = 0;
+      attempts.textContent = "Încercări: 0";
+      statusText.textContent = "Găsește codul din 3 cifre";
+
+      let puzzle = null;
+      for(let i = 0; i < 25; i++){
+        puzzle = buildPuzzle();
+        if(puzzle) break;
+      }
+
+      if(!puzzle){
+        setMessage("Nu am reușit să generez puzzle-ul. Mai apasă o dată pe „Puzzle nou”.", "bad");
+        return;
+      }
+
+      currentSolution = puzzle.code;
+      currentClues = puzzle.clues;
+      renderClues(currentClues);
+      puzzleNo.textContent = `Puzzle #${puzzleIndex}`;
+      puzzleIndex++;
+    }
+
+    function checkGuess(){
+      const guess = digitsOnly(guessInput.value);
+      guessInput.value = guess;
+      updateSlots(guess || "???");
+
+      if(guess.length !== 3){
+        setMessage("Introdu exact 3 cifre.", "bad");
+        return;
+      }
+      if(new Set(guess.split("")).size !== 3){
+        setMessage("Folosește 3 cifre diferite.", "bad");
+        return;
+      }
+
+      tries++;
+      attempts.textContent = `Încercări: ${tries}`;
+
+      if(guess === currentSolution){
+        setMessage(`Corect! Codul este ${currentSolution}. 🔓`, "ok");
+        statusText.textContent = "Puzzle rezolvat";
+      } else {
+        setMessage("Nu este corect. Mai încearcă.", "bad");
+      }
+    }
+
+    function resetCurrent(){
+      guessInput.value = "";
+      updateSlots("???");
+      tries = 0;
+      attempts.textContent = "Încercări: 0";
+      statusText.textContent = "Găsește codul din 3 cifre";
+      setMessage("", "");
+      guessInput.focus();
+    }
+
+    guessInput.addEventListener("input", e => {
+      e.target.value = digitsOnly(e.target.value);
+      updateSlots(e.target.value || "???");
+    });
+
+    guessInput.addEventListener("keydown", e => {
+      if(e.key === "Enter") checkGuess();
+    });
+
+    document.getElementById("checkBtn").addEventListener("click", checkGuess);
+    document.getElementById("resetBtn").addEventListener("click", resetCurrent);
+    document.getElementById("newBtn").addEventListener("click", generatePuzzle);
+
+    generatePuzzle();
+  </script>
+</body>
+</html>
