@@ -51,6 +51,13 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 .tableau-stack{position:relative;min-height:170px}
 .tableau-card{position:absolute;left:6px}
 .tableau-card.face-down{cursor:pointer}
+
+.sudoku-tools{display:flex;flex-direction:column;gap:12px}
+.sudoku-pad{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.sudoku-pad button{padding:10px 0;background:#fff;border:1px solid var(--line);border-radius:12px;color:#111827}
+.sudoku-pad button.active-digit{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
+.sudoku-cell.selected-cell{box-shadow:0 0 0 4px rgba(245,158,11,.35) inset}
+
 @media (max-width:1400px){.menu-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media (max-width:1200px){.menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media (max-width:1000px){.menu-grid{grid-template-columns:1fr}.code-layout,.sudoku-layout,.mines-layout,.snake-layout,.solitaire-layout,.clues-grid{grid-template-columns:1fr}.hint.wide{grid-column:auto}.screen{padding:18px}.slot{width:54px;height:54px}.box{width:38px;height:38px}.sudoku-board{width:100%}.sol-top{grid-template-columns:1fr 1fr}.sol-bottom{overflow:auto;grid-template-columns:repeat(7,120px)}}
@@ -86,7 +93,7 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 <h2>Sudoku</h2><p class="subtitle">Completează spațiile goale. Fiecare rând, coloană și pătrat 3x3 trebuie să conțină cifrele 1-9 fără repetare.</p>
 <div class="sudoku-layout">
 <div class="panel center"><div id="sudokuBoard" class="sudoku-board"></div></div>
-<div class="panel play"><h3>Acțiuni</h3><div class="control-block"><label for="sudokuDifficultySelect">Dificultate</label><select id="sudokuDifficultySelect"><option value="easy">Ușor</option><option value="medium" selected>Mediu</option><option value="hard">Greu</option></select></div><div class="input-row"><button class="primary" id="newSudokuBtn">Puzzle nou</button><button class="secondary" id="checkSudokuBtn">Verifică</button></div><div class="input-row"><button class="secondary" id="clearSudokuBtn">Șterge greșelile</button><button class="secondary" id="solveSudokuBtn">Rezolvă</button></div><div class="message" id="sudokuMessage"></div><h3>Instrucțiuni</h3><ul class="list"><li>Completezi doar celulele mov.</li><li>Cifrele negre sunt predefinite și nu se pot schimba.</li><li>Poți alege dificultatea și apoi să generezi un puzzle nou.</li></ul></div>
+<div class="panel play"><h3>Acțiuni</h3><div class="control-block"><label for="sudokuDifficultySelect">Dificultate</label><select id="sudokuDifficultySelect"><option value="easy">Ușor</option><option value="medium" selected>Mediu</option><option value="hard">Greu</option></select></div><div class="input-row"><button class="primary" id="newSudokuBtn">Puzzle nou</button><button class="secondary" id="checkSudokuBtn">Verifică</button></div><div class="input-row"><button class="secondary" id="clearSudokuBtn">Șterge greșelile</button><button class="secondary" id="solveSudokuBtn">Rezolvă</button></div><div class="sudoku-tools"><h3>Cifre</h3><div class="sudoku-pad"><button data-digit="1">1</button><button data-digit="2">2</button><button data-digit="3">3</button><button data-digit="4">4</button><button data-digit="5">5</button><button data-digit="6">6</button><button data-digit="7">7</button><button data-digit="8">8</button><button data-digit="9">9</button><button data-digit="0">Șterge</button></div></div><div class="message" id="sudokuMessage"></div><h3>Instrucțiuni</h3><ul class="list"><li>Alegi cifra de jos și apoi apeși pe căsuța dorită.</li><li>Completezi doar celulele mov.</li><li>Cifrele negre sunt predefinite și nu se pot schimba.</li><li>Când schimbi dificultatea se generează automat un puzzle nou.</li></ul></div>
 </div>
 </section>
 
@@ -182,11 +189,11 @@ document.getElementById("checkBtn").addEventListener("click",checkCodeGuess);doc
 
 // Sudoku
 const sudokuBoardEl=document.getElementById("sudokuBoard"),sudokuMessageEl=document.getElementById("sudokuMessage"),sudokuStateEl=document.getElementById("sudokuState"),sudokuDifficultySelect=document.getElementById("sudokuDifficultySelect"),sudokuDifficultyBadge=document.getElementById("sudokuDifficultyBadge");
-let sudokuSolution=[],sudokuPuzzle=[];
+let sudokuSolution=[],sudokuPuzzle=[],selectedSudokuDigit="1",selectedSudokuCell=null;
 const SUDOKU_LEVELS={
-  easy:{label:"Ușor", removals:36, attempts:180},
-  medium:{label:"Mediu", removals:46, attempts:220},
-  hard:{label:"Greu", removals:54, attempts:320}
+  easy:{label:"Ușor", removals:36, attempts:220},
+  medium:{label:"Mediu", removals:46, attempts:300},
+  hard:{label:"Greu", removals:56, attempts:420}
 };
 function setSudokuMessage(t,type=""){sudokuMessageEl.textContent=t;sudokuMessageEl.className="message "+type}
 function copyGrid(grid){return grid.map(r=>[...r])}
@@ -195,37 +202,78 @@ function isValid(grid,row,col,num){for(let x=0;x<9;x++){if(grid[row][x]===num)re
 function fillGrid(grid){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(grid[row][col]===0){for(const num of shuffleNums([1,2,3,4,5,6,7,8,9]))if(isValid(grid,row,col,num)){grid[row][col]=num;if(fillGrid(grid))return true;grid[row][col]=0}return false}return true}
 function countSudokuSolutions(grid,limit=2){let count=0;function solveCount(board){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(board[row][col]===0){for(let num=1;num<=9;num++)if(isValid(board,row,col,num)){board[row][col]=num;solveCount(board);board[row][col]=0;if(count>=limit)return}return}count++}solveCount(copyGrid(grid));return count}
 function updateSudokuDifficultyBadge(){const level=SUDOKU_LEVELS[sudokuDifficultySelect.value];sudokuDifficultyBadge.textContent=`Sudoku: ${level.label}`}
+function updateSudokuPadUI(){document.querySelectorAll('.sudoku-pad button').forEach(btn=>btn.classList.toggle('active-digit', btn.dataset.digit===selectedSudokuDigit))}
+function clearSudokuSelection(){selectedSudokuCell=null;document.querySelectorAll('.sudoku-cell').forEach(c=>c.classList.remove('selected-cell'))}
+function selectSudokuCell(el){if(el.readOnly)return;clearSudokuSelection();selectedSudokuCell=el;el.classList.add('selected-cell')}
+function applyDigitToSelectedCell(){if(!selectedSudokuCell)return;selectedSudokuCell.value = selectedSudokuDigit==="0" ? "" : selectedSudokuDigit; setSudokuMessage("","")}
 function generateSudokuPuzzle(){
   const level=SUDOKU_LEVELS[sudokuDifficultySelect.value];
   updateSudokuDifficultyBadge();
   const full=Array.from({length:9},()=>Array(9).fill(0));
   fillGrid(full);
   sudokuSolution=copyGrid(full);
-  let puzzle=copyGrid(full),removals=level.removals,tries=0;
-  while(removals>0&&tries<level.attempts){
-    const row=Math.floor(Math.random()*9),col=Math.floor(Math.random()*9);
-    if(puzzle[row][col]===0){tries++;continue}
-    const backup=puzzle[row][col];
-    puzzle[row][col]=0;
-    if(countSudokuSolutions(puzzle,2)!==1)puzzle[row][col]=backup;
-    else removals--;
-    tries++;
+  let bestPuzzle=null,bestFilled=81;
+  for(let gen=0;gen<3;gen++){
+    let puzzle=copyGrid(full),removals=level.removals,tries=0;
+    while(removals>0&&tries<level.attempts){
+      const row=Math.floor(Math.random()*9),col=Math.floor(Math.random()*9);
+      if(puzzle[row][col]===0){tries++;continue}
+      const backup=puzzle[row][col];
+      puzzle[row][col]=0;
+      if(countSudokuSolutions(puzzle,2)!==1)puzzle[row][col]=backup;
+      else removals--;
+      tries++;
+    }
+    const filled=puzzle.flat().filter(v=>v!==0).length;
+    if(filled<bestFilled){bestFilled=filled;bestPuzzle=puzzle}
   }
-  sudokuPuzzle=puzzle;
+  sudokuPuzzle=bestPuzzle || copyGrid(full);
   renderSudokuBoard();
   sudokuStateEl.textContent="Completează tabla";
   setSudokuMessage("", "");
+  clearSudokuSelection();
 }
-function renderSudokuBoard(){sudokuBoardEl.innerHTML="";for(let row=0;row<9;row++)for(let col=0;col<9;col++){const input=document.createElement("input");input.type="number";input.min="1";input.max="9";input.className="sudoku-cell";if((col+1)%3===0&&col!==8)input.classList.add("block-right");if((row+1)%3===0&&row!==8)input.classList.add("block-bottom");input.dataset.row=row;input.dataset.col=col;if(sudokuPuzzle[row][col]!==0){input.value=sudokuPuzzle[row][col];input.readOnly=true;input.classList.add("prefilled")}else{input.value="";input.classList.add("editable");input.addEventListener("input",e=>{let v=e.target.value.replace(/[^1-9]/g,"");e.target.value=v.slice(0,1);setSudokuMessage("","")})}sudokuBoardEl.appendChild(input)}}
+function renderSudokuBoard(){
+  sudokuBoardEl.innerHTML="";
+  for(let row=0;row<9;row++)for(let col=0;col<9;col++){
+    const input=document.createElement("input");
+    input.type="text";
+    input.inputMode="numeric";
+    input.maxLength="1";
+    input.className="sudoku-cell";
+    if((col+1)%3===0&&col!==8)input.classList.add("block-right");
+    if((row+1)%3===0&&row!==8)input.classList.add("block-bottom");
+    input.dataset.row=row;input.dataset.col=col;
+    if(sudokuPuzzle[row][col]!==0){
+      input.value=sudokuPuzzle[row][col];
+      input.readOnly=true;
+      input.classList.add("prefilled");
+    }else{
+      input.value="";
+      input.readOnly=false;
+      input.classList.add("editable");
+      input.addEventListener("click",()=>{selectSudokuCell(input); applyDigitToSelectedCell();});
+    }
+    sudokuBoardEl.appendChild(input);
+  }
+}
 function getCurrentSudokuGrid(){const grid=Array.from({length:9},()=>Array(9).fill(0));const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);grid[row][col]=cell.value?Number(cell.value):0});return grid}
 function checkSudoku(){const current=getCurrentSudokuGrid();for(let row=0;row<9;row++)for(let col=0;col<9;col++){if(current[row][col]===0){setSudokuMessage("Mai sunt celule goale.","bad");sudokuStateEl.textContent="Tabla nu este completă";return}if(current[row][col]!==sudokuSolution[row][col]){setSudokuMessage("Mai există greșeli în tablă.","bad");sudokuStateEl.textContent="Există greșeli";return}}setSudokuMessage("Perfect! Ai rezolvat Sudoku-ul. 🧩","ok");sudokuStateEl.textContent="Puzzle rezolvat"}
 function clearSudokuMistakes(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell.editable");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col),value=cell.value?Number(cell.value):0;if(value!==0&&value!==sudokuSolution[row][col])cell.value=""});setSudokuMessage("Am șters valorile greșite.","muted");sudokuStateEl.textContent="Continuă"}
-function solveSudoku(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);cell.value=sudokuSolution[row][col]});setSudokuMessage("Sudoku completat automat.","ok");sudokuStateEl.textContent="Rezolvat automat"}
+function solveSudoku(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);cell.value=sudokuSolution[row][col]});setSudokuMessage("Sudoku completat automat.","ok");sudokuStateEl.textContent="Rezolvat automat";clearSudokuSelection()}
 document.getElementById("newSudokuBtn").addEventListener("click",generateSudokuPuzzle);
 document.getElementById("checkSudokuBtn").addEventListener("click",checkSudoku);
 document.getElementById("clearSudokuBtn").addEventListener("click",clearSudokuMistakes);
 document.getElementById("solveSudokuBtn").addEventListener("click",solveSudoku);
-sudokuDifficultySelect.addEventListener("change", updateSudokuDifficultyBadge);
+sudokuDifficultySelect.addEventListener("change", generateSudokuPuzzle);
+document.querySelectorAll('.sudoku-pad button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    selectedSudokuDigit=btn.dataset.digit;
+    updateSudokuPadUI();
+    applyDigitToSelectedCell();
+  });
+});
+updateSudokuPadUI();
 
 // Minesweeper
 const DIFFS={easy:{label:"Ușor",rows:8,cols:8,mines:10},medium:{label:"Mediu",rows:12,cols:12,mines:22},hard:{label:"Greu",rows:16,cols:16,mines:40}};
