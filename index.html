@@ -43,6 +43,7 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 .pile{min-height:168px;border:2px dashed rgba(255,255,255,.25);border-radius:14px;position:relative;padding:6px}
 .card{width:104px;height:148px;border-radius:12px;background:#fff;border:2px solid #111827;display:flex;flex-direction:column;justify-content:space-between;padding:8px;font-weight:900;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.18);user-select:none}
 .card.red{color:#dc2626}.card.black{color:#111827}.card.small-selected{outline:4px solid #f59e0b}
+.pile.valid-drop{box-shadow:0 0 0 4px #f59e0b inset;background:rgba(245,158,11,.12)}
 .card .center{font-size:2rem;line-height:1;text-align:center}
 .card .corner{font-size:1rem;line-height:1.1}
 .card.back{background:linear-gradient(135deg,#1d4ed8,#7c3aed);border-color:#1e3a8a;color:#fff;align-items:center;justify-content:center;font-size:2rem}
@@ -81,11 +82,11 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 </section>
 
 <section id="sudokuScreen" class="screen">
-<div class="top-actions"><button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button><div class="row"><div class="badge">Sudoku clasic</div><div class="badge" id="sudokuState">Completează tabla</div></div></div>
+<div class="top-actions"><button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button><div class="row"><div class="badge" id="sudokuDifficultyBadge">Sudoku: Mediu</div><div class="badge" id="sudokuState">Completează tabla</div></div></div>
 <h2>Sudoku</h2><p class="subtitle">Completează spațiile goale. Fiecare rând, coloană și pătrat 3x3 trebuie să conțină cifrele 1-9 fără repetare.</p>
 <div class="sudoku-layout">
 <div class="panel center"><div id="sudokuBoard" class="sudoku-board"></div></div>
-<div class="panel play"><h3>Acțiuni</h3><div class="input-row"><button class="primary" id="newSudokuBtn">Puzzle nou</button><button class="secondary" id="checkSudokuBtn">Verifică</button></div><div class="input-row"><button class="secondary" id="clearSudokuBtn">Șterge greșelile</button><button class="secondary" id="solveSudokuBtn">Rezolvă</button></div><div class="message" id="sudokuMessage"></div><h3>Instrucțiuni</h3><ul class="list"><li>Completezi doar celulele mov.</li><li>Cifrele negre sunt predefinite și nu se pot schimba.</li><li>Poți genera alte puzzle-uri din butonul „Puzzle nou”.</li></ul></div>
+<div class="panel play"><h3>Acțiuni</h3><div class="control-block"><label for="sudokuDifficultySelect">Dificultate</label><select id="sudokuDifficultySelect"><option value="easy">Ușor</option><option value="medium" selected>Mediu</option><option value="hard">Greu</option></select></div><div class="input-row"><button class="primary" id="newSudokuBtn">Puzzle nou</button><button class="secondary" id="checkSudokuBtn">Verifică</button></div><div class="input-row"><button class="secondary" id="clearSudokuBtn">Șterge greșelile</button><button class="secondary" id="solveSudokuBtn">Rezolvă</button></div><div class="message" id="sudokuMessage"></div><h3>Instrucțiuni</h3><ul class="list"><li>Completezi doar celulele mov.</li><li>Cifrele negre sunt predefinite și nu se pot schimba.</li><li>Poți alege dificultatea și apoi să generezi un puzzle nou.</li></ul></div>
 </div>
 </section>
 
@@ -148,7 +149,7 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
   <div class="mine-stats"><div class="stat">🃏 Deck: <span id="stockCount">24</span></div><div class="stat">✅ Foundation: <span id="foundationCount">0</span></div><div class="stat">↔️ Mutări: <span id="solMoves">0</span></div><div class="stat">🎯 Selectat: <span id="solSelected">nimic</span></div></div>
   <div class="message" id="solitaireMessage"></div>
   <h3>Reguli</h3>
-  <ul class="list"><li>Pe tableau pui culori alternate și valori descrescătoare.</li><li>Pe foundation urci de la A la K, pe aceeași suită.</li><li>Pe coloană goală poți pune doar un Rege.</li></ul>
+  <ul class="list"><li>Pe tableau pui <b>culori alternate</b> și <b>valori descrescătoare</b>.</li><li>Exemplu corect: <b>7♥ pe 8♠</b>.</li><li>Exemple greșite: <b>7♠ pe 8♠</b> și <b>5♠ pe 4♥</b>.</li><li>Pe foundation urci de la A la K, pe aceeași suită.</li><li>Pe coloană goală poți pune doar un Rege.</li></ul>
 </div>
 </div>
 </section>
@@ -180,21 +181,51 @@ guessInput.addEventListener("input",e=>{e.target.value=digitsOnly(e.target.value
 document.getElementById("checkBtn").addEventListener("click",checkCodeGuess);document.getElementById("resetBtn").addEventListener("click",resetCodeCurrent);document.getElementById("newBtn").addEventListener("click",generateCodePuzzle);
 
 // Sudoku
-const sudokuBoardEl=document.getElementById("sudokuBoard"),sudokuMessageEl=document.getElementById("sudokuMessage"),sudokuStateEl=document.getElementById("sudokuState");
+const sudokuBoardEl=document.getElementById("sudokuBoard"),sudokuMessageEl=document.getElementById("sudokuMessage"),sudokuStateEl=document.getElementById("sudokuState"),sudokuDifficultySelect=document.getElementById("sudokuDifficultySelect"),sudokuDifficultyBadge=document.getElementById("sudokuDifficultyBadge");
 let sudokuSolution=[],sudokuPuzzle=[];
+const SUDOKU_LEVELS={
+  easy:{label:"Ușor", removals:36, attempts:180},
+  medium:{label:"Mediu", removals:46, attempts:220},
+  hard:{label:"Greu", removals:54, attempts:320}
+};
 function setSudokuMessage(t,type=""){sudokuMessageEl.textContent=t;sudokuMessageEl.className="message "+type}
 function copyGrid(grid){return grid.map(r=>[...r])}
 function shuffleNums(nums){const arr=[...nums];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
 function isValid(grid,row,col,num){for(let x=0;x<9;x++){if(grid[row][x]===num)return false;if(grid[x][col]===num)return false}const sr=Math.floor(row/3)*3,sc=Math.floor(col/3)*3;for(let r=sr;r<sr+3;r++)for(let c=sc;c<sc+3;c++)if(grid[r][c]===num)return false;return true}
 function fillGrid(grid){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(grid[row][col]===0){for(const num of shuffleNums([1,2,3,4,5,6,7,8,9]))if(isValid(grid,row,col,num)){grid[row][col]=num;if(fillGrid(grid))return true;grid[row][col]=0}return false}return true}
 function countSudokuSolutions(grid,limit=2){let count=0;function solveCount(board){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(board[row][col]===0){for(let num=1;num<=9;num++)if(isValid(board,row,col,num)){board[row][col]=num;solveCount(board);board[row][col]=0;if(count>=limit)return}return}count++}solveCount(copyGrid(grid));return count}
-function generateSudokuPuzzle(){const full=Array.from({length:9},()=>Array(9).fill(0));fillGrid(full);sudokuSolution=copyGrid(full);let puzzle=copyGrid(full),removals=46,tries=0;while(removals>0&&tries<220){const row=Math.floor(Math.random()*9),col=Math.floor(Math.random()*9);if(puzzle[row][col]===0){tries++;continue}const backup=puzzle[row][col];puzzle[row][col]=0;if(countSudokuSolutions(puzzle,2)!==1)puzzle[row][col]=backup;else removals--;tries++}sudokuPuzzle=puzzle;renderSudokuBoard();sudokuStateEl.textContent="Completează tabla";setSudokuMessage("","")}
+function updateSudokuDifficultyBadge(){const level=SUDOKU_LEVELS[sudokuDifficultySelect.value];sudokuDifficultyBadge.textContent=`Sudoku: ${level.label}`}
+function generateSudokuPuzzle(){
+  const level=SUDOKU_LEVELS[sudokuDifficultySelect.value];
+  updateSudokuDifficultyBadge();
+  const full=Array.from({length:9},()=>Array(9).fill(0));
+  fillGrid(full);
+  sudokuSolution=copyGrid(full);
+  let puzzle=copyGrid(full),removals=level.removals,tries=0;
+  while(removals>0&&tries<level.attempts){
+    const row=Math.floor(Math.random()*9),col=Math.floor(Math.random()*9);
+    if(puzzle[row][col]===0){tries++;continue}
+    const backup=puzzle[row][col];
+    puzzle[row][col]=0;
+    if(countSudokuSolutions(puzzle,2)!==1)puzzle[row][col]=backup;
+    else removals--;
+    tries++;
+  }
+  sudokuPuzzle=puzzle;
+  renderSudokuBoard();
+  sudokuStateEl.textContent="Completează tabla";
+  setSudokuMessage("", "");
+}
 function renderSudokuBoard(){sudokuBoardEl.innerHTML="";for(let row=0;row<9;row++)for(let col=0;col<9;col++){const input=document.createElement("input");input.type="number";input.min="1";input.max="9";input.className="sudoku-cell";if((col+1)%3===0&&col!==8)input.classList.add("block-right");if((row+1)%3===0&&row!==8)input.classList.add("block-bottom");input.dataset.row=row;input.dataset.col=col;if(sudokuPuzzle[row][col]!==0){input.value=sudokuPuzzle[row][col];input.readOnly=true;input.classList.add("prefilled")}else{input.value="";input.classList.add("editable");input.addEventListener("input",e=>{let v=e.target.value.replace(/[^1-9]/g,"");e.target.value=v.slice(0,1);setSudokuMessage("","")})}sudokuBoardEl.appendChild(input)}}
 function getCurrentSudokuGrid(){const grid=Array.from({length:9},()=>Array(9).fill(0));const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);grid[row][col]=cell.value?Number(cell.value):0});return grid}
 function checkSudoku(){const current=getCurrentSudokuGrid();for(let row=0;row<9;row++)for(let col=0;col<9;col++){if(current[row][col]===0){setSudokuMessage("Mai sunt celule goale.","bad");sudokuStateEl.textContent="Tabla nu este completă";return}if(current[row][col]!==sudokuSolution[row][col]){setSudokuMessage("Mai există greșeli în tablă.","bad");sudokuStateEl.textContent="Există greșeli";return}}setSudokuMessage("Perfect! Ai rezolvat Sudoku-ul. 🧩","ok");sudokuStateEl.textContent="Puzzle rezolvat"}
 function clearSudokuMistakes(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell.editable");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col),value=cell.value?Number(cell.value):0;if(value!==0&&value!==sudokuSolution[row][col])cell.value=""});setSudokuMessage("Am șters valorile greșite.","muted");sudokuStateEl.textContent="Continuă"}
 function solveSudoku(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);cell.value=sudokuSolution[row][col]});setSudokuMessage("Sudoku completat automat.","ok");sudokuStateEl.textContent="Rezolvat automat"}
-document.getElementById("newSudokuBtn").addEventListener("click",generateSudokuPuzzle);document.getElementById("checkSudokuBtn").addEventListener("click",checkSudoku);document.getElementById("clearSudokuBtn").addEventListener("click",clearSudokuMistakes);document.getElementById("solveSudokuBtn").addEventListener("click",solveSudoku);
+document.getElementById("newSudokuBtn").addEventListener("click",generateSudokuPuzzle);
+document.getElementById("checkSudokuBtn").addEventListener("click",checkSudoku);
+document.getElementById("clearSudokuBtn").addEventListener("click",clearSudokuMistakes);
+document.getElementById("solveSudokuBtn").addEventListener("click",solveSudoku);
+sudokuDifficultySelect.addEventListener("change", updateSudokuDifficultyBadge);
 
 // Minesweeper
 const DIFFS={easy:{label:"Ușor",rows:8,cols:8,mines:10},medium:{label:"Mediu",rows:12,cols:12,mines:22},hard:{label:"Greu",rows:16,cols:16,mines:40}};
@@ -246,34 +277,43 @@ function canMoveToFoundation(card, idx){const pile=sol.foundations[idx];if(!pile
 function canMoveToTableau(card, idx){const pile=sol.tableau[idx];if(!pile.length) return card.rank===13;const top=pile[pile.length-1];if(!top.faceUp) return false;return isRed(top.suit)!==isRed(card.suit) && card.rank===top.rank-1}
 function revealTop(tableauIdx){const pile=sol.tableau[tableauIdx];if(pile.length && !pile[pile.length-1].faceUp)pile[pile.length-1].faceUp=true}
 function clearSelection(){sol.selected=null;updateSolStats();renderSolitaire()}
-function selectCard(source, pileIdx, cardIdx, label){sol.selected={source,pileIdx,cardIdx,label};updateSolStats();renderSolitaire()}
-function takeSelectedCards(){if(!sol.selected) return []; const {source,pileIdx,cardIdx}=sol.selected; if(source==="waste"){return [sol.waste.pop()]} if(source==="foundation"){return [sol.foundations[pileIdx].pop()]} if(source==="tableau"){return sol.tableau[pileIdx].splice(cardIdx)} return []}
-function returnCards(cards){if(!sol.selected) return; const {source,pileIdx}=sol.selected; if(source==="waste") sol.waste.push(...cards); else if(source==="foundation") sol.foundations[pileIdx].push(...cards); else if(source==="tableau") sol.tableau[pileIdx].push(...cards)}
-function tryMoveToFoundation(idx){if(!sol.selected) return; const cards=getSelectedCards(); if(cards.length!==1){setSolitaireMessage("Poți muta doar o carte pe foundation.","bad"); return} const card=cards[0]; if(!canMoveToFoundation(card, idx)){setSolitaireMessage("Mutare invalidă pe foundation.","bad"); return} takeSelectedCards(); sol.foundations[idx].push(card); afterSolMove()}
-function tryMoveToTableau(idx){if(!sol.selected) return; const cards=getSelectedCards(); if(!cards.length) return; const first=cards[0]; if(!canMoveToTableau(first, idx)){setSolitaireMessage("Mutare invalidă pe coloană.","bad"); return} takeSelectedCards(); sol.tableau[idx].push(...cards); afterSolMove()}
+function selectCard(source, pileIdx, cardIdx, label){if(sol.selected && sol.selected.source===source && sol.selected.pileIdx===pileIdx && sol.selected.cardIdx===cardIdx){clearSelection();return}sol.selected={source,pileIdx,cardIdx,label};setSolitaireMessage("","");updateSolStats();renderSolitaire()}
 function getSelectedCards(){if(!sol.selected) return []; const {source,pileIdx,cardIdx}=sol.selected; if(source==="waste") return sol.waste.length?[sol.waste[sol.waste.length-1]]:[]; if(source==="foundation") return sol.foundations[pileIdx].length?[sol.foundations[pileIdx][sol.foundations[pileIdx].length-1]]:[]; if(source==="tableau") return sol.tableau[pileIdx].slice(cardIdx); return []}
-function afterSolMove(){if(sol.selected && sol.selected.source==="tableau") revealTop(sol.selected.pileIdx); sol.moves++; clearSelection(); setSolitaireMessage("Mutare făcută.","ok"); solitaireState.textContent="În desfășurare"; checkSolitaireWin()}
+function takeSelectedCards(){if(!sol.selected) return []; const {source,pileIdx,cardIdx}=sol.selected; if(source==="waste") return [sol.waste.pop()]; if(source==="foundation") return [sol.foundations[pileIdx].pop()]; if(source==="tableau") return sol.tableau[pileIdx].splice(cardIdx); return []}
+function tryAutoFoundationFromSelection(){if(!sol.selected) return false; const cards=getSelectedCards(); if(cards.length!==1) return false; const card=cards[0]; for(let i=0;i<4;i++){ if(canMoveToFoundation(card,i)){ takeSelectedCards(); sol.foundations[i].push(card); afterSolMove(); return true; } } return false }
+function foundationInvalidMessage(card, idx){const pile=sol.foundations[idx]; if(!pile.length) return "Pe foundation poți începe doar cu As."; const top=pile[pile.length-1]; if(top.suit!==card.suit) return "Pe foundation trebuie aceeași suită."; return "Pe foundation urci doar în ordine de la A la K."}
+function tableauInvalidMessage(card, idx){const pile=sol.tableau[idx]; if(!pile.length) return "Pe coloană goală poți pune doar un Rege."; const top=pile[pile.length-1]; if(isRed(top.suit)===isRed(card.suit)) return "Mutare invalidă: pe tableau culorile trebuie să alterneze."; if(card.rank!==top.rank-1) return "Mutare invalidă: pe tableau valorile trebuie să coboare cu 1."; return "Mutare invalidă pe coloană."}
+function isValidDropTarget(type, idx){if(!sol.selected) return false; const cards=getSelectedCards(); if(!cards.length) return false; if(type==="foundation"){ if(cards.length!==1) return false; return canMoveToFoundation(cards[0], idx); } if(type==="tableau"){ return canMoveToTableau(cards[0], idx); } return false}
+function tryMoveToFoundation(idx){if(!sol.selected) return; const cards=getSelectedCards(); if(cards.length!==1){setSolitaireMessage("Poți muta doar o carte pe foundation.","bad"); return} const card=cards[0]; if(!canMoveToFoundation(card, idx)){setSolitaireMessage(foundationInvalidMessage(card, idx),"bad"); return} takeSelectedCards(); sol.foundations[idx].push(card); afterSolMove()}
+function tryMoveToTableau(idx){if(!sol.selected) return; const cards=getSelectedCards(); if(!cards.length) return; if(sol.selected.source==="tableau" && sol.selected.pileIdx===idx){clearSelection(); return} const first=cards[0]; if(!canMoveToTableau(first, idx)){setSolitaireMessage(tableauInvalidMessage(first, idx),"bad"); return} takeSelectedCards(); sol.tableau[idx].push(...cards); afterSolMove()}
+function afterSolMove(){if(sol.selected && sol.selected.source==="tableau") revealTop(sol.selected.pileIdx); sol.moves++; const wasFoundationSelected = sol.selected && sol.selected.source==="foundation"; clearSelection(); setSolitaireMessage("Mutare făcută.","ok"); solitaireState.textContent="În desfășurare"; if(wasFoundationSelected) renderSolitaire(); checkSolitaireWin()}
 function drawFromStock(){clearSelection(); if(sol.stock.length){const c=sol.stock.pop(); c.faceUp=true; sol.waste.push(c); solitaireState.textContent="În desfășurare"; setSolitaireMessage("", "");} else {while(sol.waste.length){const c=sol.waste.pop(); c.faceUp=false; sol.stock.push(c)} setSolitaireMessage("Waste a fost întors în deck.","muted")} updateSolStats(); renderSolitaire()}
 function newSolitaire(){const deck=makeDeck(); sol={stock:[],waste:[],foundations:[[],[],[],[]],tableau:[[],[],[],[],[],[],[]],selected:null,moves:0}; for(let i=0;i<7;i++){for(let j=0;j<=i;j++){const card=deck.pop(); card.faceUp=j===i; sol.tableau[i].push(card)}} sol.stock=deck; solitaireState.textContent="Joc nou"; setSolitaireMessage("", ""); updateSolStats(); renderSolitaire()}
 function checkSolitaireWin(){const total=sol.foundations.reduce((a,p)=>a+p.length,0); if(total===52){solitaireState.textContent="Ai câștigat"; setSolitaireMessage("Bravo! Ai terminat Solitaire. 🃏","ok")}}
-function renderPileCard(container, html){container.innerHTML=html}
 function renderSolitaire(){
   stockPile.innerHTML = sol.stock.length ? `<div class="card back" id="stockCard">🂠</div>` : `<div class="card-placeholder" id="stockCard"></div>`;
   document.getElementById("stockCard").onclick = drawFromStock;
+
   const wasteTop=sol.waste[sol.waste.length-1];
   wastePile.innerHTML = wasteTop ? renderCard(wasteTop, sol.selected && sol.selected.source==="waste" ? "small-selected":"") : `<div class="card-placeholder"></div>`;
-  if(wasteTop) wastePile.firstElementChild.onclick=()=>selectCard("waste",0,0,cardLabel(wasteTop));
+  if(wasteTop){
+    wastePile.firstElementChild.onclick=()=>selectCard("waste",0,0,cardLabel(wasteTop));
+    wastePile.firstElementChild.ondblclick=()=>{selectCard("waste",0,0,cardLabel(wasteTop)); if(!tryAutoFoundationFromSelection()) setSolitaireMessage("Nu există mutare automată pe foundation pentru această carte.","muted")}
+  }
 
   for(let i=0;i<4;i++){
     const el=document.getElementById(`foundation${i}`), top=sol.foundations[i][sol.foundations[i].length-1];
+    el.classList.toggle("valid-drop", isValidDropTarget("foundation", i));
     el.innerHTML = top ? renderCard(top, sol.selected && sol.selected.source==="foundation" && sol.selected.pileIdx===i ? "small-selected":"") : `<div class="card-placeholder"></div>`;
     el.onclick=()=>{ if(sol.selected) tryMoveToFoundation(i); else if(top) selectCard("foundation",i,sol.foundations[i].length-1,cardLabel(top)); };
+    if(top){ el.ondblclick=()=>selectCard("foundation",i,sol.foundations[i].length-1,cardLabel(top)); }
   }
 
   for(let i=0;i<7;i++){
     const el=document.getElementById(`tableau${i}`);
-    el.innerHTML="";
     const pile=sol.tableau[i];
+    el.classList.toggle("valid-drop", isValidDropTarget("tableau", i));
+    el.innerHTML="";
     if(!pile.length){
       el.innerHTML=`<div class="card-placeholder"></div>`;
       el.onclick=()=>{ if(sol.selected) tryMoveToTableau(i); };
@@ -286,8 +326,19 @@ function renderSolitaire(){
       wrap.innerHTML = card.faceUp ? renderCard(card, sol.selected && sol.selected.source==="tableau" && sol.selected.pileIdx===i && sol.selected.cardIdx===idx ? "small-selected":"") : `<div class="card back">🂠</div>`;
       wrap.onclick=(e)=>{
         e.stopPropagation();
-        if(sol.selected){ tryMoveToTableau(i); return; }
-        if(card.faceUp) selectCard("tableau",i,idx,cardLabel(card));
+        if(!card.faceUp) return;
+        if(sol.selected){
+          if(sol.selected.source==="tableau" && sol.selected.pileIdx===i && sol.selected.cardIdx===idx){ clearSelection(); return; }
+          tryMoveToTableau(i);
+          return;
+        }
+        selectCard("tableau",i,idx,cardLabel(card));
+      };
+      wrap.ondblclick=(e)=>{
+        e.stopPropagation();
+        if(!card.faceUp) return;
+        selectCard("tableau",i,idx,cardLabel(card));
+        if(!tryAutoFoundationFromSelection()) setSolitaireMessage("Nu există mutare automată pe foundation pentru această carte.","muted");
       };
       el.appendChild(wrap);
     });
