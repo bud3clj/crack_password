@@ -1,463 +1,154 @@
 <!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Crack the Password - Random</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Puzzle Hub</title>
   <style>
-    :root{
-      --bg1:#140f2d;
-      --bg2:#5b1f61;
-      --text:#111827;
-      --muted:#6b7280;
-      --accent:#7c3aed;
-      --accent2:#ec4899;
-      --ok:#16a34a;
-      --bad:#dc2626;
-      --line:#e5e7eb;
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      min-height:100vh;
-      font-family:Inter, Arial, Helvetica, sans-serif;
-      color:var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(236,72,153,.22), transparent 28%),
-        radial-gradient(circle at bottom right, rgba(124,58,237,.30), transparent 30%),
-        linear-gradient(135deg,var(--bg1),var(--bg2));
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-    }
-    .app{
-      width:min(860px,100%);
-      background:rgba(255,255,255,.97);
-      border-radius:26px;
-      box-shadow:0 20px 70px rgba(0,0,0,.35);
-      padding:26px;
-    }
-    h1{
-      margin:0 0 6px;
-      text-align:center;
-      font-size:clamp(2rem,4vw,3rem);
-    }
-    .subtitle{
-      margin:0 0 18px;
-      text-align:center;
-      color:var(--muted);
-    }
-    .topbar{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:20px;
-    }
-    .badge{
-      padding:8px 12px;
-      border-radius:999px;
-      background:#f3f4f6;
-      font-weight:700;
-      color:#374151;
-      font-size:.95rem;
-    }
-    .lock-row{
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      gap:12px;
-      margin-bottom:20px;
-      font-size:2rem;
-      font-weight:700;
-    }
-    .slots{display:flex;gap:10px}
-    .slot{
-      width:62px;
-      height:62px;
-      border:3px solid #111;
-      border-radius:12px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.9rem;
-      font-weight:800;
-      background:#fafafa;
-    }
-    .section-title{
-      text-align:center;
-      font-size:1.05rem;
-      font-weight:900;
-      letter-spacing:.08em;
-      margin:4px 0 14px;
-    }
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(2,1fr);
-      gap:14px;
-      margin-bottom:22px;
-    }
-    .hint{
-      border:1px solid var(--line);
-      border-radius:18px;
-      padding:16px;
-      background:#fcfcfd;
-      min-height:110px;
-    }
-    .hint.wide{grid-column:1 / -1}
-    .code{
-      display:inline-flex;
-      gap:6px;
-      margin-bottom:10px;
-    }
-    .box{
-      width:42px;
-      height:42px;
-      border:2px solid #111;
-      border-radius:9px;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-size:1.2rem;
-      font-weight:800;
-      background:#fff;
-    }
-    .hint p{
-      margin:0;
-      font-weight:800;
-      line-height:1.35;
-    }
-    .play{
-      border-top:1px solid var(--line);
-      padding-top:20px;
-    }
-    .input-row{
-      display:flex;
-      gap:12px;
-      justify-content:center;
-      flex-wrap:wrap;
-    }
-    input{
-      width:190px;
-      max-width:100%;
-      font-size:1.35rem;
-      padding:14px 16px;
-      border-radius:14px;
-      border:2px solid #d1d5db;
-      outline:none;
-      text-align:center;
-      letter-spacing:.35em;
-      font-weight:800;
-    }
-    input:focus{
-      border-color:var(--accent);
-      box-shadow:0 0 0 4px rgba(124,58,237,.12);
-    }
-    button{
-      border:none;
-      border-radius:14px;
-      padding:14px 18px;
-      font-size:1rem;
-      font-weight:800;
-      cursor:pointer;
-      transition:transform .16s ease, opacity .16s ease;
-    }
-    button:hover{transform:translateY(-1px)}
-    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}
-    .secondary{background:#f3f4f6;color:#111827}
-    .message{
-      min-height:28px;
-      margin-top:16px;
-      text-align:center;
-      font-size:1.05rem;
-      font-weight:800;
-    }
-    .ok{color:var(--ok)}
-    .bad{color:var(--bad)}
-    .meta,.note{
-      text-align:center;
-      color:var(--muted);
-      margin-top:8px;
-    }
-    .footer{
-      text-align:center;
-      color:var(--muted);
-      font-size:.92rem;
-      margin-top:18px;
-    }
-    @media (max-width:700px){
-      .grid{grid-template-columns:1fr}
-      .hint.wide{grid-column:auto}
-      .app{padding:18px;border-radius:20px}
-      .slot{width:54px;height:54px}
-      .box{width:38px;height:38px}
-    }
+    :root{--bg1:#140f2d;--bg2:#5b1f61;--card:rgba(255,255,255,.97);--text:#111827;--muted:#6b7280;--accent:#7c3aed;--accent2:#ec4899;--ok:#16a34a;--bad:#dc2626;--line:#e5e7eb;--soft:#f3f4f6}
+    *{box-sizing:border-box} body{margin:0;min-height:100vh;font-family:Inter,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at top left, rgba(236,72,153,.22), transparent 28%),radial-gradient(circle at bottom right, rgba(124,58,237,.30), transparent 30%),linear-gradient(135deg,var(--bg1),var(--bg2));padding:18px}
+    .shell{width:min(1080px,100%);margin:0 auto}.screen{display:none;background:var(--card);border-radius:28px;box-shadow:0 20px 70px rgba(0,0,0,.35);padding:26px}.screen.active{display:block}
+    .hero{text-align:center;padding:14px 0 4px}.hero p{color:var(--muted);margin:10px auto 0;max-width:700px}
+    .menu-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:28px}
+    .menu-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:22px;box-shadow:0 10px 30px rgba(0,0,0,.06);display:flex;flex-direction:column;gap:14px}
+    .menu-card .emoji{font-size:2.2rem}.menu-card p{margin:0;color:var(--muted);line-height:1.45}
+    .row,.top-actions,.input-row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}.row,.top-actions{justify-content:space-between}.top-actions{margin-bottom:18px}
+    .badge{padding:8px 12px;border-radius:999px;background:var(--soft);font-weight:700;color:#374151;font-size:.95rem}
+    button{border:none;border-radius:14px;padding:12px 16px;font-size:1rem;font-weight:800;cursor:pointer;transition:transform .16s ease} button:hover{transform:translateY(-1px)}
+    .primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff}.secondary{background:var(--soft);color:#111827}.ghost{background:#fff;border:1px solid var(--line);color:#111827}.small{padding:10px 14px;font-size:.95rem}
+    .subtitle{color:var(--muted);margin-top:8px}.code-layout,.sudoku-layout{display:grid;gap:22px;align-items:start}.code-layout{grid-template-columns:1.1fr .9fr}.sudoku-layout{grid-template-columns:1fr 340px}
+    .lock-row{display:flex;justify-content:center;align-items:center;gap:12px;margin:8px 0 16px;font-size:2rem;font-weight:700}.slots{display:flex;gap:10px}
+    .slot{width:62px;height:62px;border:3px solid #111;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.9rem;font-weight:800;background:#fafafa}
+    .section-title{text-align:center;font-size:1.05rem;font-weight:900;letter-spacing:.08em;margin:8px 0 14px}.clues-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+    .hint{border:1px solid var(--line);border-radius:18px;padding:16px;background:#fcfcfd;min-height:108px}.hint.wide{grid-column:1 / -1}
+    .code{display:inline-flex;gap:6px;margin-bottom:10px}.box{width:42px;height:42px;border:2px solid #111;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;background:#fff}
+    .hint p{margin:0;font-weight:800;line-height:1.35}.panel{border:1px solid var(--line);border-radius:20px;padding:18px;background:#fff}.play{display:flex;flex-direction:column;gap:14px}
+    input.code-input{width:180px;max-width:100%;font-size:1.35rem;padding:14px 16px;border-radius:14px;border:2px solid #d1d5db;outline:none;text-align:center;letter-spacing:.35em;font-weight:800}
+    input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(124,58,237,.12)}.message{min-height:28px;font-size:1.05rem;font-weight:800}.ok{color:var(--ok)}.bad{color:var(--bad)}.muted{color:var(--muted)}
+    .list{margin:0;padding-left:18px;color:var(--muted);line-height:1.55}.sudoku-board{display:grid;grid-template-columns:repeat(9,1fr);width:min(540px,100%);aspect-ratio:1/1;border:3px solid #111;margin:8px auto 0;background:#fff}
+    .sudoku-cell{width:100%;height:100%;border:1px solid #cbd5e1;text-align:center;font-size:clamp(1rem,2vw,1.5rem);font-weight:800;outline:none}.prefilled{background:#f8fafc;color:#0f172a}.editable{background:#fff;color:#7c3aed}
+    .sudoku-cell.block-right{border-right:3px solid #111}.sudoku-cell.block-bottom{border-bottom:3px solid #111}.sudoku-cell::-webkit-outer-spin-button,.sudoku-cell::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}.sudoku-cell[type=number]{-moz-appearance:textfield}.center{text-align:center}
+    @media (max-width:900px){.menu-grid,.code-layout,.sudoku-layout,.clues-grid{grid-template-columns:1fr}.hint.wide{grid-column:auto}.screen{padding:18px}.slot{width:54px;height:54px}.box{width:38px;height:38px}.sudoku-board{width:100%}}
   </style>
 </head>
 <body>
-  <main class="app">
-    <h1>Crack the Password</h1>
-    <p class="subtitle">Același tip de joc ca în imagine, dar cu puzzle-uri random și foarte multe variante.</p>
-
-    <div class="topbar">
-      <div class="badge" id="puzzleNo">Puzzle #1</div>
-      <div class="badge" id="statusText">Găsește codul din 3 cifre</div>
-    </div>
-
-    <div class="lock-row" aria-hidden="true">
-      <span>🔒</span>
-      <div class="slots">
-        <div class="slot" id="r1">?</div>
-        <div class="slot" id="r2">?</div>
-        <div class="slot" id="r3">?</div>
+  <div class="shell">
+    <section id="menuScreen" class="screen active">
+      <div class="hero">
+        <h1>Puzzle Hub</h1>
+        <p>Alege jocul pe care vrei să îl joci. Ai <b>Crack the Code</b> și <b>Sudoku</b> în același site.</p>
       </div>
-    </div>
-
-    <div class="section-title">INDICII</div>
-    <section class="grid" id="clues"></section>
-
-    <section class="play">
-      <div class="input-row">
-        <input id="guess" type="text" inputmode="numeric" maxlength="3" placeholder="Ex: 042" aria-label="Introdu codul" />
-        <button class="primary" id="checkBtn">Verifică</button>
-        <button class="secondary" id="resetBtn">Resetează</button>
-        <button class="secondary" id="newBtn">Puzzle nou</button>
+      <div class="menu-grid">
+        <article class="menu-card">
+          <div class="emoji">🔒</div>
+          <h2>Crack the Code</h2>
+          <p>Găsești codul din 3 cifre folosind indiciile generate automat. Fiecare puzzle are o singură soluție.</p>
+          <div class="row"><span class="badge">Puzzle-uri random</span><button class="primary" onclick="showScreen('codeScreen')">Joacă</button></div>
+        </article>
+        <article class="menu-card">
+          <div class="emoji">🧩</div>
+          <h2>Sudoku</h2>
+          <p>Sudoku 9x9 cu puzzle nou, validare și rezolvare.</p>
+          <div class="row"><span class="badge">Generator inclus</span><button class="primary" onclick="showScreen('sudokuScreen')">Joacă</button></div>
+        </article>
       </div>
-      <div class="message" id="message"></div>
-      <div class="meta" id="attempts">Încercări: 0</div>
-      <div class="note">Fiecare puzzle este generat astfel încât să aibă o singură soluție.</div>
     </section>
 
-    <div class="footer">Codurile folosesc 3 cifre diferite. Poate începe și cu 0.</div>
-  </main>
+    <section id="codeScreen" class="screen">
+      <div class="top-actions">
+        <button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button>
+        <div class="row">
+          <div class="badge" id="puzzleNo">Puzzle #1</div>
+          <div class="badge" id="statusText">Găsește codul din 3 cifre</div>
+        </div>
+      </div>
+      <h2>Crack the Code</h2>
+      <p class="subtitle">Același tip de joc ca în imagine, dar cu puzzle-uri random și multe variante.</p>
+      <div class="code-layout">
+        <div>
+          <div class="lock-row"><span>🔒</span><div class="slots"><div class="slot" id="r1">?</div><div class="slot" id="r2">?</div><div class="slot" id="r3">?</div></div></div>
+          <div class="section-title">INDICII</div>
+          <section class="clues-grid" id="clues"></section>
+        </div>
+        <div class="panel play">
+          <h3>Încearcă un cod</h3>
+          <div class="input-row"><input id="guess" class="code-input" type="text" inputmode="numeric" maxlength="3" placeholder="Ex: 042"><button class="primary" id="checkBtn">Verifică</button></div>
+          <div class="input-row"><button class="secondary" id="resetBtn">Resetează</button><button class="secondary" id="newBtn">Puzzle nou</button></div>
+          <div class="message" id="message"></div>
+          <div class="muted" id="attempts">Încercări: 0</div>
+          <h3>Reguli</h3>
+          <ul class="list"><li>Codul are 3 cifre diferite.</li><li>Poate începe și cu 0.</li><li>Indiciile sunt generate astfel încât să existe o singură soluție.</li></ul>
+        </div>
+      </div>
+    </section>
 
-  <script>
-    const cluesContainer = document.getElementById("clues");
-    const guessInput = document.getElementById("guess");
-    const message = document.getElementById("message");
-    const attempts = document.getElementById("attempts");
-    const puzzleNo = document.getElementById("puzzleNo");
-    const statusText = document.getElementById("statusText");
-    const slots = [document.getElementById("r1"), document.getElementById("r2"), document.getElementById("r3")];
+    <section id="sudokuScreen" class="screen">
+      <div class="top-actions">
+        <button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button>
+        <div class="row"><div class="badge">Sudoku clasic</div><div class="badge" id="sudokuState">Completează tabla</div></div>
+      </div>
+      <h2>Sudoku</h2>
+      <p class="subtitle">Completează spațiile goale. Fiecare rând, coloană și pătrat 3x3 trebuie să conțină cifrele 1-9 fără repetare.</p>
+      <div class="sudoku-layout">
+        <div class="panel center"><div id="sudokuBoard" class="sudoku-board"></div></div>
+        <div class="panel play">
+          <h3>Acțiuni</h3>
+          <div class="input-row"><button class="primary" id="newSudokuBtn">Puzzle nou</button><button class="secondary" id="checkSudokuBtn">Verifică</button></div>
+          <div class="input-row"><button class="secondary" id="clearSudokuBtn">Șterge greșelile</button><button class="secondary" id="solveSudokuBtn">Rezolvă</button></div>
+          <div class="message" id="sudokuMessage"></div>
+          <h3>Instrucțiuni</h3>
+          <ul class="list"><li>Completezi doar celulele mov.</li><li>Cifrele negre sunt predefinite și nu se pot schimba.</li><li>Poți genera alte puzzle-uri din butonul „Puzzle nou”.</li></ul>
+        </div>
+      </div>
+    </section>
+  </div>
 
-    let tries = 0;
-    let puzzleIndex = 1;
-    let currentSolution = "";
-    let currentClues = [];
+<script>
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 
-    const PATTERN_LABELS = {
-      "1-0": "Un număr este corect și este pe poziția corectă.",
-      "0-1": "Un număr este corect, dar este pe poziția greșită.",
-      "0-2": "Două numere sunt corecte, dar sunt pe poziții greșite.",
-      "0-0": "Nimic nu este corect."
-    };
+const cluesContainer=document.getElementById("clues"),guessInput=document.getElementById("guess"),message=document.getElementById("message"),attempts=document.getElementById("attempts"),puzzleNo=document.getElementById("puzzleNo"),statusText=document.getElementById("statusText"),slots=[document.getElementById("r1"),document.getElementById("r2"),document.getElementById("r3")];
+let tries=0,puzzleIndex=1,currentSolution="";
+const PATTERN_LABELS={"1-0":"Un număr este corect și este pe poziția corectă.","0-1":"Un număr este corect, dar este pe poziția greșită.","0-2":"Două numere sunt corecte, dar sunt pe poziții greșite.","0-0":"Nimic nu este corect."};
+function digitsOnly(v){return v.replace(/\D/g,"").slice(0,3)}
+function updateSlots(v="???"){const c=v.padEnd(3,"?").slice(0,3).split("");slots.forEach((s,i)=>s.textContent=c[i])}
+function setCodeMessage(t,type=""){message.textContent=t;message.className="message "+type}
+function allCodes(){const a=[];for(let i=0;i<=9;i++)for(let j=0;j<=9;j++)for(let k=0;k<=9;k++)if(i!==j&&i!==k&&j!==k)a.push(`${i}${j}${k}`);return a}
+const CODES=allCodes();
+function evaluateCodeGuess(guess,code){let wellPlaced=0,common=0;for(let i=0;i<3;i++){if(guess[i]===code[i])wellPlaced++;if(code.includes(guess[i]))common++}return {wellPlaced,wrongPlaced:common-wellPlaced}}
+function patternMatches(guess,code,key){const r=evaluateCodeGuess(guess,code);return key===`${r.wellPlaced}-${r.wrongPlaced}`}
+function shuffle(array){const a=[...array];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function renderClues(clues){cluesContainer.innerHTML="";clues.forEach((clue,idx)=>{const article=document.createElement("article");article.className="hint"+(idx===4?" wide":"");const codeHtml=clue.guess.split("").map(d=>`<div class="box">${d}</div>`).join("");article.innerHTML=`<div class="code">${codeHtml}</div><p>${PATTERN_LABELS[clue.pattern]}</p>`;cluesContainer.appendChild(article)})}
+function solutionCount(clues){let count=0,only=null;for(const candidate of CODES){const ok=clues.every(clue=>patternMatches(clue.guess,candidate,clue.pattern));if(ok){count++;only=candidate;if(count>1)break}}return {count,only}}
+function buildCodePuzzle(){const code=CODES[Math.floor(Math.random()*CODES.length)],buckets={"1-0":[],"0-1":[],"0-2":[],"0-0":[]};for(const guess of CODES){if(guess===code)continue;const ev=evaluateCodeGuess(guess,code),key=`${ev.wellPlaced}-${ev.wrongPlaced}`;if(buckets[key])buckets[key].push(guess)}const order={"1-0":shuffle(buckets["1-0"]),"0-1":shuffle(buckets["0-1"]),"0-2":shuffle(buckets["0-2"]),"0-0":shuffle(buckets["0-0"])};const maxA=Math.min(90,order["1-0"].length),maxB=Math.min(130,order["0-1"].length),maxC=Math.min(90,order["0-2"].length),maxD=Math.min(60,order["0-0"].length);
+for(let a=0;a<maxA;a++)for(let b=0;b<maxB;b++)for(let c=0;c<maxC;c++)for(let d=0;d<maxD;d++)for(let e=b+1;e<Math.min(b+30,maxB);e++){const selected=[{guess:order["1-0"][a],pattern:"1-0"},{guess:order["0-1"][b],pattern:"0-1"},{guess:order["0-2"][c],pattern:"0-2"},{guess:order["0-0"][d],pattern:"0-0"},{guess:order["0-1"][e],pattern:"0-1"}];if(new Set(selected.map(x=>x.guess)).size!==5)continue;const result=solutionCount(selected);if(result.count===1&&result.only===code)return {code,clues:selected}}return null}
+function generateCodePuzzle(){setCodeMessage("","");guessInput.value="";updateSlots("???");tries=0;attempts.textContent="Încercări: 0";statusText.textContent="Găsește codul din 3 cifre";let puzzle=null;for(let i=0;i<25;i++){puzzle=buildCodePuzzle();if(puzzle)break}if(!puzzle){setCodeMessage("Nu am reușit să generez puzzle-ul. Mai apasă o dată pe „Puzzle nou”.","bad");return}currentSolution=puzzle.code;renderClues(puzzle.clues);puzzleNo.textContent=`Puzzle #${puzzleIndex}`;puzzleIndex++}
+function checkCodeGuess(){const guess=digitsOnly(guessInput.value);guessInput.value=guess;updateSlots(guess||"???");if(guess.length!==3){setCodeMessage("Introdu exact 3 cifre.","bad");return}if(new Set(guess.split("")).size!==3){setCodeMessage("Folosește 3 cifre diferite.","bad");return}tries++;attempts.textContent=`Încercări: ${tries}`;if(guess===currentSolution){setCodeMessage(`Corect! Codul este ${currentSolution}. 🔓`,"ok");statusText.textContent="Puzzle rezolvat"}else setCodeMessage("Nu este corect. Mai încearcă.","bad")}
+function resetCodeCurrent(){guessInput.value="";updateSlots("???");tries=0;attempts.textContent="Încercări: 0";statusText.textContent="Găsește codul din 3 cifre";setCodeMessage("","");guessInput.focus()}
+guessInput.addEventListener("input",e=>{e.target.value=digitsOnly(e.target.value);updateSlots(e.target.value||"???")});
+guessInput.addEventListener("keydown",e=>{if(e.key==="Enter")checkCodeGuess()});
+document.getElementById("checkBtn").addEventListener("click",checkCodeGuess);
+document.getElementById("resetBtn").addEventListener("click",resetCodeCurrent);
+document.getElementById("newBtn").addEventListener("click",generateCodePuzzle);
 
-    function digitsOnly(value){
-      return value.replace(/\D/g, "").slice(0,3);
-    }
-
-    function updateSlots(value = "???"){
-      const chars = value.padEnd(3, "?").slice(0,3).split("");
-      slots.forEach((slot, i) => slot.textContent = chars[i]);
-    }
-
-    function setMessage(text, type = ""){
-      message.textContent = text;
-      message.className = "message " + type;
-    }
-
-    function allCodes(){
-      const arr = [];
-      for(let i = 0; i <= 9; i++){
-        for(let j = 0; j <= 9; j++){
-          for(let k = 0; k <= 9; k++){
-            if(i !== j && i !== k && j !== k){
-              arr.push(`${i}${j}${k}`);
-            }
-          }
-        }
-      }
-      return arr;
-    }
-
-    const CODES = allCodes();
-
-    function evaluate(guess, code){
-      let wellPlaced = 0;
-      let common = 0;
-      for(let i = 0; i < 3; i++){
-        if(guess[i] === code[i]) wellPlaced++;
-        if(code.includes(guess[i])) common++;
-      }
-      return { wellPlaced, wrongPlaced: common - wellPlaced };
-    }
-
-    function patternMatches(guess, code, key){
-      const result = evaluate(guess, code);
-      return key === `${result.wellPlaced}-${result.wrongPlaced}`;
-    }
-
-    function shuffle(array){
-      const a = [...array];
-      for(let i = a.length - 1; i > 0; i--){
-        const j = Math.floor(Math.random() * (i + 1));
-        [a[i], a[j]] = [a[j], a[i]];
-      }
-      return a;
-    }
-
-    function renderClues(clues){
-      cluesContainer.innerHTML = "";
-      clues.forEach((clue, idx) => {
-        const article = document.createElement("article");
-        article.className = "hint" + (idx === 4 ? " wide" : "");
-        const codeHtml = clue.guess.split("").map(d => `<div class="box">${d}</div>`).join("");
-        article.innerHTML = `<div class="code">${codeHtml}</div><p>${PATTERN_LABELS[clue.pattern]}</p>`;
-        cluesContainer.appendChild(article);
-      });
-    }
-
-    function solutionCount(clues){
-      let count = 0;
-      let only = null;
-      for(const candidate of CODES){
-        const ok = clues.every(clue => patternMatches(clue.guess, candidate, clue.pattern));
-        if(ok){
-          count++;
-          only = candidate;
-          if(count > 1) break;
-        }
-      }
-      return { count, only };
-    }
-
-    function buildPuzzle(){
-      const code = CODES[Math.floor(Math.random() * CODES.length)];
-      const buckets = { "1-0": [], "0-1": [], "0-2": [], "0-0": [] };
-
-      for(const guess of CODES){
-        if(guess === code) continue;
-        const ev = evaluate(guess, code);
-        const key = `${ev.wellPlaced}-${ev.wrongPlaced}`;
-        if(buckets[key]) buckets[key].push(guess);
-      }
-
-      const order = {
-        "1-0": shuffle(buckets["1-0"]),
-        "0-1": shuffle(buckets["0-1"]),
-        "0-2": shuffle(buckets["0-2"]),
-        "0-0": shuffle(buckets["0-0"])
-      };
-
-      const maxA = Math.min(90, order["1-0"].length);
-      const maxB = Math.min(130, order["0-1"].length);
-      const maxC = Math.min(90, order["0-2"].length);
-      const maxD = Math.min(60, order["0-0"].length);
-
-      for(let a = 0; a < maxA; a++){
-        for(let b = 0; b < maxB; b++){
-          for(let c = 0; c < maxC; c++){
-            for(let d = 0; d < maxD; d++){
-              for(let e = b + 1; e < Math.min(b + 30, maxB); e++){
-                const selected = [
-                  { guess: order["1-0"][a], pattern: "1-0" },
-                  { guess: order["0-1"][b], pattern: "0-1" },
-                  { guess: order["0-2"][c], pattern: "0-2" },
-                  { guess: order["0-0"][d], pattern: "0-0" },
-                  { guess: order["0-1"][e], pattern: "0-1" }
-                ];
-
-                if(new Set(selected.map(x => x.guess)).size !== 5) continue;
-
-                const result = solutionCount(selected);
-                if(result.count === 1 && result.only === code){
-                  return { code, clues: selected };
-                }
-              }
-            }
-          }
-        }
-      }
-      return null;
-    }
-
-    function generatePuzzle(){
-      setMessage("", "");
-      guessInput.value = "";
-      updateSlots("???");
-      tries = 0;
-      attempts.textContent = "Încercări: 0";
-      statusText.textContent = "Găsește codul din 3 cifre";
-
-      let puzzle = null;
-      for(let i = 0; i < 25; i++){
-        puzzle = buildPuzzle();
-        if(puzzle) break;
-      }
-
-      if(!puzzle){
-        setMessage("Nu am reușit să generez puzzle-ul. Mai apasă o dată pe „Puzzle nou”.", "bad");
-        return;
-      }
-
-      currentSolution = puzzle.code;
-      currentClues = puzzle.clues;
-      renderClues(currentClues);
-      puzzleNo.textContent = `Puzzle #${puzzleIndex}`;
-      puzzleIndex++;
-    }
-
-    function checkGuess(){
-      const guess = digitsOnly(guessInput.value);
-      guessInput.value = guess;
-      updateSlots(guess || "???");
-
-      if(guess.length !== 3){
-        setMessage("Introdu exact 3 cifre.", "bad");
-        return;
-      }
-      if(new Set(guess.split("")).size !== 3){
-        setMessage("Folosește 3 cifre diferite.", "bad");
-        return;
-      }
-
-      tries++;
-      attempts.textContent = `Încercări: ${tries}`;
-
-      if(guess === currentSolution){
-        setMessage(`Corect! Codul este ${currentSolution}. 🔓`, "ok");
-        statusText.textContent = "Puzzle rezolvat";
-      } else {
-        setMessage("Nu este corect. Mai încearcă.", "bad");
-      }
-    }
-
-    function resetCurrent(){
-      guessInput.value = "";
-      updateSlots("???");
-      tries = 0;
-      attempts.textContent = "Încercări: 0";
-      statusText.textContent = "Găsește codul din 3 cifre";
-      setMessage("", "");
-      guessInput.focus();
-    }
-
-    guessInput.addEventListener("input", e => {
-      e.target.value = digitsOnly(e.target.value);
-      updateSlots(e.target.value || "???");
-    });
-
-    guessInput.addEventListener("keydown", e => {
-      if(e.key === "Enter") checkGuess();
-    });
-
-    document.getElementById("checkBtn").addEventListener("click", checkGuess);
-    document.getElementById("resetBtn").addEventListener("click", resetCurrent);
-    document.getElementById("newBtn").addEventListener("click", generatePuzzle);
-
-    generatePuzzle();
-  </script>
+const sudokuBoardEl=document.getElementById("sudokuBoard"),sudokuMessageEl=document.getElementById("sudokuMessage"),sudokuStateEl=document.getElementById("sudokuState");
+let sudokuSolution=[],sudokuPuzzle=[];
+function setSudokuMessage(t,type=""){sudokuMessageEl.textContent=t;sudokuMessageEl.className="message "+type}
+function copyGrid(grid){return grid.map(r=>[...r])}
+function shuffleNums(nums){const arr=[...nums];for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function isValid(grid,row,col,num){for(let x=0;x<9;x++){if(grid[row][x]===num)return false;if(grid[x][col]===num)return false}const sr=Math.floor(row/3)*3,sc=Math.floor(col/3)*3;for(let r=sr;r<sr+3;r++)for(let c=sc;c<sc+3;c++)if(grid[r][c]===num)return false;return true}
+function fillGrid(grid){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(grid[row][col]===0){for(const num of shuffleNums([1,2,3,4,5,6,7,8,9]))if(isValid(grid,row,col,num)){grid[row][col]=num;if(fillGrid(grid))return true;grid[row][col]=0}return false}return true}
+function countSudokuSolutions(grid,limit=2){let count=0;function solveCount(board){for(let row=0;row<9;row++)for(let col=0;col<9;col++)if(board[row][col]===0){for(let num=1;num<=9;num++)if(isValid(board,row,col,num)){board[row][col]=num;solveCount(board);board[row][col]=0;if(count>=limit)return}return}count++}solveCount(copyGrid(grid));return count}
+function generateSudokuPuzzle(){const full=Array.from({length:9},()=>Array(9).fill(0));fillGrid(full);sudokuSolution=copyGrid(full);let puzzle=copyGrid(full),removals=46,tries=0;while(removals>0&&tries<220){const row=Math.floor(Math.random()*9),col=Math.floor(Math.random()*9);if(puzzle[row][col]===0){tries++;continue}const backup=puzzle[row][col];puzzle[row][col]=0;if(countSudokuSolutions(puzzle,2)!==1)puzzle[row][col]=backup;else removals--;tries++}sudokuPuzzle=puzzle;renderSudokuBoard();sudokuStateEl.textContent="Completează tabla";setSudokuMessage("","")}
+function renderSudokuBoard(){sudokuBoardEl.innerHTML="";for(let row=0;row<9;row++)for(let col=0;col<9;col++){const input=document.createElement("input");input.type="number";input.min="1";input.max="9";input.className="sudoku-cell";if((col+1)%3===0&&col!==8)input.classList.add("block-right");if((row+1)%3===0&&row!==8)input.classList.add("block-bottom");input.dataset.row=row;input.dataset.col=col;if(sudokuPuzzle[row][col]!==0){input.value=sudokuPuzzle[row][col];input.readOnly=true;input.classList.add("prefilled")}else{input.value="";input.classList.add("editable");input.addEventListener("input",e=>{let v=e.target.value.replace(/[^1-9]/g,"");e.target.value=v.slice(0,1);setSudokuMessage("","")})}sudokuBoardEl.appendChild(input)}}
+function getCurrentSudokuGrid(){const grid=Array.from({length:9},()=>Array(9).fill(0));const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);grid[row][col]=cell.value?Number(cell.value):0});return grid}
+function checkSudoku(){const current=getCurrentSudokuGrid();for(let row=0;row<9;row++)for(let col=0;col<9;col++){if(current[row][col]===0){setSudokuMessage("Mai sunt celule goale.","bad");sudokuStateEl.textContent="Tabla nu este completă";return}if(current[row][col]!==sudokuSolution[row][col]){setSudokuMessage("Mai există greșeli în tablă.","bad");sudokuStateEl.textContent="Există greșeli";return}}setSudokuMessage("Perfect! Ai rezolvat Sudoku-ul. 🧩","ok");sudokuStateEl.textContent="Puzzle rezolvat"}
+function clearSudokuMistakes(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell.editable");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col),value=cell.value?Number(cell.value):0;if(value!==0&&value!==sudokuSolution[row][col])cell.value=""});setSudokuMessage("Am șters valorile greșite.","muted");sudokuStateEl.textContent="Continuă"}
+function solveSudoku(){const cells=sudokuBoardEl.querySelectorAll(".sudoku-cell");cells.forEach(cell=>{const row=Number(cell.dataset.row),col=Number(cell.dataset.col);cell.value=sudokuSolution[row][col]});setSudokuMessage("Sudoku completat automat.","ok");sudokuStateEl.textContent="Rezolvat automat"}
+document.getElementById("newSudokuBtn").addEventListener("click",generateSudokuPuzzle);
+document.getElementById("checkSudokuBtn").addEventListener("click",checkSudoku);
+document.getElementById("clearSudokuBtn").addEventListener("click",clearSudokuMistakes);
+document.getElementById("solveSudokuBtn").addEventListener("click",solveSudoku);
+generateCodePuzzle();generateSudokuPuzzle();
+</script>
 </body>
 </html>
