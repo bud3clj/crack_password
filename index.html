@@ -52,7 +52,7 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 <section id="menuScreen" class="screen active">
 <div class="hero">
 <h1>Puzzle Hub</h1>
-<p>Alege jocul pe care vrei să îl joci. Ai <b>Crack the Code</b>, <b>Sudoku</b>, <b>Minesweeper</b>, <b>Snake</b>, <b>Solitaire</b> și acum și jocul cu bila și bara de jos: <b>Brick Breaker</b>.</p>
+<p>Alege jocul pe care vrei să îl joci. Ai <b>Crack the Code</b>, <b>Sudoku</b>, <b>Minesweeper</b>, <b>Snake</b>, <b>Solitaire</b>, <b>Brick Breaker</b> și noul joc de programare: <b>C++ Code Quiz</b>.</p>
 </div>
 <div class="menu-grid">
 <article class="menu-card"><div class="emoji">🔒</div><h2>Crack the Code</h2><p>Găsești codul din 3 cifre folosind indiciile generate automat. Fiecare puzzle are o singură soluție.</p><div class="row"><span class="badge">Puzzle-uri random</span><button class="primary" onclick="showScreen('codeScreen')">Joacă</button></div></article>
@@ -61,6 +61,7 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 <article class="menu-card"><div class="emoji">🐍</div><h2>Snake</h2><p>Mănânci mere, crești și încerci să nu intri nici în pereți, nici în propriul corp.</p><div class="row"><span class="badge">Arcade clasic</span><button class="primary" onclick="showScreen('snakeScreen')">Joacă</button></div></article>
 <article class="menu-card"><div class="emoji">🃏</div><h2>Solitaire</h2><p>Variantă simplă, jucabilă, cu click pe cărți și mutări după regulile de bază.</p><div class="row"><span class="badge">Klondike simplu</span><button class="primary" onclick="showScreen('solitaireScreen')">Joacă</button></div></article>
 <article class="menu-card"><div class="emoji">🏓</div><h2>Brick Breaker</h2><p>Controlezi bara de jos, ricoșezi bila și spargi cărămizile din partea de sus.</p><div class="row"><span class="badge">Arcade retro</span><button class="primary" onclick="showScreen('breakerScreen')">Joacă</button></div></article>
+<article class="menu-card"><div class="emoji">🖥️</div><h2>C++ Code Quiz</h2><p>Citești un program C++, ghicești ce afișează și înveți cum funcționează intrarea și ieșirea în C++.</p><div class="row"><span class="badge">Programare C++</span><button class="primary" onclick="showScreen('cppScreen')">Joacă</button></div></article>
 </div>
 </section>
 
@@ -75,6 +76,42 @@ input.code-input:focus,.sudoku-cell:focus{border-color:var(--accent);box-shadow:
 <section id="solitaireScreen" class="screen"><div class="top-actions"><button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button><div class="row"><div class="badge" id="solitaireState">Joc nou</div><div class="badge">Mutări cu click</div></div></div><h2>Solitaire</h2><p class="subtitle">Varianta simplă: selectezi o carte și apoi apeși pe destinație. Click pe deck pentru a trage o carte nouă.</p><div class="solitaire-layout"><div class="panel"><div class="solitaire-board"><div class="sol-top"><div id="stockPile" class="pile"></div><div id="wastePile" class="pile"></div><div></div><div id="foundation0" class="pile"></div><div id="foundation1" class="pile"></div><div id="foundation2" class="pile"></div><div id="foundation3" class="pile"></div></div><div class="sol-bottom"><div id="tableau0" class="pile tableau-stack"></div><div id="tableau1" class="pile tableau-stack"></div><div id="tableau2" class="pile tableau-stack"></div><div id="tableau3" class="pile tableau-stack"></div><div id="tableau4" class="pile tableau-stack"></div><div id="tableau5" class="pile tableau-stack"></div><div id="tableau6" class="pile tableau-stack"></div></div></div></div><div class="panel play"><div class="input-row"><button class="primary" id="newSolitaireBtn">Joc nou</button><button class="secondary" id="drawCardBtn">Trage carte</button></div><div class="mine-stats"><div class="stat">🃏 Deck: <span id="stockCount">24</span></div><div class="stat">✅ Foundation: <span id="foundationCount">0</span></div><div class="stat">↔️ Mutări: <span id="solMoves">0</span></div><div class="stat">🎯 Selectat: <span id="solSelected">nimic</span></div></div><div class="message" id="solitaireMessage"></div><h3>Reguli</h3><ul class="list"><li>Pe tableau pui <b>culori alternate</b> și <b>valori descrescătoare</b>.</li><li>Exemplu corect: <b>7♥ pe 8♠</b>.</li><li>Exemple greșite: <b>7♠ pe 8♠</b> și <b>5♠ pe 4♥</b>.</li><li>Pe foundation urci de la A la K, pe aceeași suită.</li><li>Pe coloană goală poți pune doar un Rege.</li></ul></div></div></section>
 
 <section id="breakerScreen" class="screen"><div class="top-actions"><button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button><div class="row"><div class="badge" id="breakerState">Apasă Start</div><div class="badge">Controale: ← → / A D</div></div></div><h2>Brick Breaker</h2><p class="subtitle">Miști bara din partea de jos, ricoșezi bila și spargi toate cărămizile de sus. Am făcut bila mai lentă, bara mai fină și am adăugat niveluri + power-ups.</p><div class="breaker-layout"><div class="panel center"><div class="breaker-wrap"><canvas id="breakerCanvas" width="540" height="420"></canvas></div></div><div class="panel play"><div class="input-row"><button class="primary" id="startBreakerBtn">Start</button><button class="secondary" id="resetBreakerBtn">Reset</button></div><div class="mine-stats"><div class="stat">🧱 Cărămizi: <span id="breakerBricks">0</span></div><div class="stat">❤️ Vieți: <span id="breakerLives">3</span></div><div class="stat">⭐ Scor: <span id="breakerScore">0</span></div><div class="stat">⚡ Viteză: <span id="breakerSpeed">1</span></div><div class="stat">🎮 Nivel: <span id="breakerLevel">1</span></div><div class="stat">✨ Power-up: <span id="breakerPower">Nimic</span></div></div><div class="message" id="breakerMessage"></div><h3>Reguli</h3><ul class="list"><li>Miști bara cu săgețile stânga-dreapta sau A și D.</li><li>Dacă bila cade jos, pierzi o viață.</li><li>Câștigi nivelul când spargi toate cărămizile.</li><li>Uneori cad power-ups: bară mai mare, minge mai lentă sau viață extra.</li></ul></div></div></section>
+
+<section id="cppScreen" class="screen">
+<div class="top-actions"><button class="ghost small" onclick="showScreen('menuScreen')">← Înapoi la meniu</button><div class="row"><div class="badge" id="cppQuizNo">Întrebarea 1 / 5</div><div class="badge" id="cppQuizScore">Scor: 0</div></div></div>
+<h2>C++ Code Quiz</h2>
+<p class="subtitle">Citește codul C++ de mai jos și ghicește ce va afișa programul pentru intrarea dată.</p>
+<div class="code-layout">
+  <div class="panel">
+    <h3>Codul C++</h3>
+    <pre id="cppCodeBlock" style="background:#0f172a;color:#e2e8f0;padding:20px;border-radius:14px;font-size:.97rem;line-height:1.65;overflow-x:auto;margin:0;white-space:pre-wrap;word-break:break-word;"></pre>
+    <div style="margin-top:14px;padding:12px 16px;background:var(--soft);border-radius:12px;font-weight:700;">📥 Intrare: <span id="cppInput" style="font-family:monospace;color:var(--accent)"></span></div>
+    <div style="margin-top:10px;padding:12px 16px;background:var(--soft);border-radius:12px;font-weight:700;display:none;" id="cppExplanationBox">💡 <span id="cppExplanation" style="color:var(--muted);font-weight:600;"></span></div>
+  </div>
+  <div class="panel play">
+    <h3>Ce afișează programul?</h3>
+    <div class="input-row">
+      <input id="cppAnswer" class="code-input" type="text" style="width:100%;letter-spacing:normal;text-align:left;" placeholder="Scrie output-ul aici...">
+    </div>
+    <div class="input-row">
+      <button class="primary" id="cppCheckBtn">Verifică</button>
+      <button class="secondary" id="cppNextBtn" style="display:none">Următoarea →</button>
+    </div>
+    <div class="message" id="cppMessage"></div>
+    <div style="margin-top:16px;" id="cppProgressWrap">
+      <div style="font-weight:800;margin-bottom:8px;color:#374151;">Progres</div>
+      <div style="display:flex;gap:8px;" id="cppDots"></div>
+    </div>
+    <h3 style="margin-top:16px">Cum se joacă</h3>
+    <ul class="list">
+      <li>Citești codul C++ și intrarea dată.</li>
+      <li>Scrii exact ce crezi că va afișa programul.</li>
+      <li>Spațiile și majusculele contează!</li>
+      <li>Dacă greșești, vei vedea răspunsul corect și o explicație.</li>
+    </ul>
+  </div>
+</div>
+</section>
 </div>
 
 <script>
@@ -372,8 +409,50 @@ function loopBreaker(){
 document.getElementById("startBreakerBtn").addEventListener("click",startBreaker);
 document.getElementById("resetBreakerBtn").addEventListener("click",()=>resetBreaker(true));
 
-// Init
-generateCodePuzzle();generateSudokuPuzzle();newMinesGame();resetSnake();newSolitaire();resetBreaker();
+// C++ Code Quiz
+const CPP_PUZZLES=[
+  {
+    code:`#include <iostream>\n#include <string>\nusing namespace std;\n\nint main()\n{\n    string s;\n    cout << "Enter the sentence with spaces "<<endl;\n    getline(cin, s);\n    cout << s;\n    return 0;\n}`,
+    input:"Hello World",
+    output:"Hello World",
+    explanation:"getline(cin, s) citește întreaga linie, inclusiv spațiile. De aceea output-ul este \"Hello World\" și nu doar \"Hello\"."
+  },
+  {
+    code:`#include <iostream>\n#include <string>\nusing namespace std;\n\nint main()\n{\n    string s;\n    cin >> s;\n    cout << s;\n    return 0;\n}`,
+    input:"Hello World",
+    output:"Hello",
+    explanation:"cin >> s citește doar primul cuvânt (se oprește la spațiu). De aceea afișează numai \"Hello\", nu \"Hello World\"."
+  },
+  {
+    code:`#include <iostream>\nusing namespace std;\n\nint main()\n{\n    int a = 5, b = 3;\n    cout << a + b;\n    return 0;\n}`,
+    input:"(fără intrare)",
+    output:"8",
+    explanation:"Programul calculează 5 + 3 = 8 și îl afișează cu cout."
+  },
+  {
+    code:`#include <iostream>\nusing namespace std;\n\nint main()\n{\n    for(int i = 1; i <= 4; i++)\n        cout << i;\n    return 0;\n}`,
+    input:"(fără intrare)",
+    output:"1234",
+    explanation:"Bucla for rulează de la i=1 până la i=4 inclusiv și afișează fiecare valoare fără separator, rezultând \"1234\"."
+  },
+  {
+    code:`#include <iostream>\n#include <string>\nusing namespace std;\n\nint main()\n{\n    string a = "Buna";\n    string b = " ziua";\n    cout << a + b;\n    return 0;\n}`,
+    input:"(fără intrare)",
+    output:"Buna ziua",
+    explanation:"Operatorul + concatenează două string-uri. \"Buna\" + \" ziua\" produce \"Buna ziua\"."
+  }
+];
+let cppCurrent=0,cppScore=0,cppAnswered=false;
+const cppCodeBlock=document.getElementById("cppCodeBlock"),cppInputEl=document.getElementById("cppInput"),cppExplanationBox=document.getElementById("cppExplanationBox"),cppExplanationEl=document.getElementById("cppExplanation"),cppAnswerEl=document.getElementById("cppAnswer"),cppMessageEl=document.getElementById("cppMessage"),cppCheckBtn=document.getElementById("cppCheckBtn"),cppNextBtn=document.getElementById("cppNextBtn"),cppQuizNo=document.getElementById("cppQuizNo"),cppQuizScore=document.getElementById("cppQuizScore"),cppDots=document.getElementById("cppDots");
+function setCppMessage(t,type=""){cppMessageEl.textContent=t;cppMessageEl.className="message "+type}
+function renderCppDots(){cppDots.innerHTML="";CPP_PUZZLES.forEach((_,i)=>{const d=document.createElement("div");d.style.cssText=`width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:800;border:2px solid #d1d5db;background:${i<cppCurrent?"#16a34a":i===cppCurrent?"var(--accent)":"#f3f4f6"};color:${i<=cppCurrent?"#fff":"#9ca3af"}`;d.textContent=i<cppCurrent?"✓":String(i+1);cppDots.appendChild(d)})}
+function loadCppPuzzle(idx){const p=CPP_PUZZLES[idx];cppCodeBlock.textContent=p.code;cppInputEl.textContent=p.input;cppExplanationBox.style.display="none";cppAnswerEl.value="";cppAnswerEl.disabled=false;setCppMessage("","");cppCheckBtn.style.display="";cppNextBtn.style.display="none";cppAnswered=false;cppQuizNo.textContent=`Întrebarea ${idx+1} / ${CPP_PUZZLES.length}`;cppQuizScore.textContent=`Scor: ${cppScore}`;renderCppDots();cppAnswerEl.focus()}
+function checkCppAnswer(){if(cppAnswered)return;const answer=cppAnswerEl.value.trim();const p=CPP_PUZZLES[cppCurrent];if(answer===p.output){cppScore++;setCppMessage("Corect! 🎉","ok")}else{setCppMessage(`Greșit. Răspunsul corect este: "${p.output}"`,"bad")}cppAnswered=true;cppAnswerEl.disabled=true;cppExplanationEl.textContent=p.explanation;cppExplanationBox.style.display="";cppCheckBtn.style.display="none";cppNextBtn.style.display="";cppQuizScore.textContent=`Scor: ${cppScore}`;renderCppDots()}
+function nextCppPuzzle(){cppCurrent++;if(cppCurrent>=CPP_PUZZLES.length){cppCodeBlock.textContent="";cppInputEl.textContent="";cppExplanationBox.style.display="none";cppAnswerEl.value="";cppAnswerEl.disabled=true;cppCheckBtn.style.display="none";cppNextBtn.style.display="none";setCppMessage(`Quiz terminat! Scor final: ${cppScore} / ${CPP_PUZZLES.length} 🏆`,"ok");cppQuizNo.textContent="Terminat";cppQuizScore.textContent=`Scor: ${cppScore}`;renderCppDots()}else{loadCppPuzzle(cppCurrent)}}
+cppCheckBtn.addEventListener("click",checkCppAnswer);cppNextBtn.addEventListener("click",nextCppPuzzle);cppAnswerEl.addEventListener("keydown",e=>{if(e.key==="Enter")checkCppAnswer()});
+function initCppQuiz(){cppCurrent=0;cppScore=0;loadCppPuzzle(0)}
+
+generateCodePuzzle();generateSudokuPuzzle();newMinesGame();resetSnake();newSolitaire();resetBreaker();initCppQuiz();
 </script>
 </body>
 </html>
